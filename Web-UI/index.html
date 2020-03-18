@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+
+<script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+<script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+<script type="text/javascript"
+	src="lib/CryptoJS/components/enc-base64.js"></script>
+<script type="text/javascript" src="lib/url-template/url-template.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+<script type="text/javascript"
+	src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+<script type="text/javascript"
+	src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+<script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+<script type="text/javascript" src="apigClient.js"></script>
+
+<script>
+    var apigClient = apigClientFactory.newClient();
+    function pushChat(){
+    	var wisdomText = document.getElementById('wisdom');
+			if (wisdomText && wisdomText.value && wisdomText.value.trim().length > 0) {
+				var wisdom = wisdomText.value.trim();
+				wisdomText.value = '...';
+				wisdomText.locked = true;
+				showRequest(wisdom);
+    	var params = {
+  			param0: '',
+  			param1: ''
+		};
+var body = {
+  "answer": wisdom,
+  "user": "user1"
+};
+var additionalParams = {
+};
+
+apigClient.chatbotPost(params, body, additionalParams)
+    .then(function(result){
+    	showResponse(result);
+      //console.log(result);
+    }).catch( function(result){
+    	showError(result);
+    	//console.log(result);
+    });
+    wisdomText.value = '';
+	wisdomText.locked = false;
+	}
+    return false;
+    }
+    
+    	function showRequest(daText) {
+			var conversationDiv = document.getElementById('conversation');
+			var requestPara = document.createElement("P");
+			requestPara.className = 'userRequest';
+			requestPara.appendChild(document.createTextNode(daText));
+			conversationDiv.appendChild(requestPara);
+			conversationDiv.scrollTop = conversationDiv.scrollHeight;
+		}
+
+		function showError(daText) {
+			var conversationDiv = document.getElementById('conversation');
+			var errorPara = document.createElement("P");
+			errorPara.className = 'lexError';
+			errorPara.appendChild(document.createTextNode(daText));
+			conversationDiv.appendChild(errorPara);
+			conversationDiv.scrollTop = conversationDiv.scrollHeight;
+		}
+
+		function showResponse(lexResponse) {
+			var conversationDiv = document.getElementById('conversation');
+			var responsePara = document.createElement("P");
+			responsePara.className = 'lexResponse';
+			if (lexResponse.data.body.message) {
+				responsePara.appendChild(document.createTextNode(lexResponse.data.body.message));
+				responsePara.appendChild(document.createElement('br'));
+			}else if (lexResponse.data.body.dialogState === 'ReadyForFulfillment') {
+				responsePara.appendChild(document.createTextNode(
+					'Ready for fulfillment'));
+			} else {
+				responsePara.appendChild(document.createTextNode(
+					'(' + lexResponse.data.body.dialogState + ')'));
+			}
+			conversationDiv.appendChild(responsePara);
+			conversationDiv.scrollTop = conversationDiv.scrollHeight;
+		}
+/* for front end*/
+	var screenHeight = document.body.clientHeight;
+    </script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="header_box">
+			<div class="header">
+				<h1 class="title">Restaurant Concierge</h1>
+			</div>
+		</div>
+		<div class="right_box">
+			<div id="conversation" class = "conversation_box"></div>
+			<div class="input_box">
+				<form id="chatform" 
+					onsubmit="return pushChat();">
+					<input type="text" id="wisdom" size="80" value="" placeholder="Say hello to your assistant!">
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+<style language="text/css">
+html{
+	height:100%;
+}
+
+body{
+	background-image:url(./pic/index-back.png);
+	background-size:cover;
+	background-repeat:no-repeat;
+	background-attachment: fixed;
+	height: screenHeight;
+}
+
+
+
+input::placeholder {
+	color: #ccc;
+	font-style: italic;
+}
+
+.header_box{
+	height:150px;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	
+}
+
+.header{
+	background: rgba(0,0,0,0.4);
+	height: 70px;
+	width:350px;
+	display:flex;
+	align-items:center;
+	justify-content:center;	
+	border-color: #D9A566;
+	border-top-style: solid;
+	border-bottom-style: solid;
+}
+
+.title{
+	color:#D9A566;
+}
+
+.right_box{
+	background: rgba(238,238,238,0.8);
+	margin:0 5% 0 40%;
+}
+.conversation_box{
+	height: 600px; 
+	border: 1px solid #ccc; 
+	/*background-color: #eee; */
+	/*margin:0 5% 0 40%;*/
+	padding: 4px; 
+	overflow: scroll;
+	/*opacity:0.8;*/
+}
+
+.input_box{
+	margin-top:10px;
+}
+
+input#wisdom {
+	padding: 4px;
+	font-size: 1em;
+	/*opacity: 0.8;*/
+	box-sizing: border-box;
+	width:100%;
+}
+
+/*user line*/
+p.userRequest {
+	margin: 4px;
+	padding: 4px 10px 4px 10px;
+	border-radius: 4px;
+	/*min-width: 50%;*/
+	/*max-width: 85%;*/
+	float: left;
+	clear:both;
+	background-color: #D96B2B;
+	text-align:left;
+	/*display:inline-block;*/
+}
+
+/*response line*/
+p.lexResponse {
+	margin: 4px;
+	padding: 4px 10px 4px 10px;
+	border-radius: 4px;
+	text-align: right;
+	/*min-width: 50%;*/
+	/*max-width: 85%;*/
+	float: right;
+	clear:both;
+	background-color: #D9A566;
+	text-align:left;
+	/*display:inline-block;*/
+	/*font-style: italic;*/
+}
+
+p.lexError {
+	margin: 4px;
+	padding: 4px 10px 4px 10px;
+	border-radius: 4px;
+	text-align: right;
+	/*min-width: 50%;*/
+	/*max-width: 85%;*/
+	float: right;
+	clear:both;
+	text-align:left;
+	background-color: #D92949;
+}
+</style>
+</html>
